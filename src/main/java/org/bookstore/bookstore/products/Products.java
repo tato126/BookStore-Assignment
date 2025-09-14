@@ -17,15 +17,15 @@ public class Products {
 //    private ProductCategory productCategory;
 
     private String productName;
-
     private int price;
-    private int discountRate;
-    private int stockQuantity;
     private String description;
-    private String imageUrl;
-    private double rating;
-    private int salesCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isActive;
+
+//    private int discountRate;
+//    private int stockQuantity;
+//    private String imageUrl;
+//    private double rating;
+//    private int salesCount;
+//    private Boolean isActive;
 }
