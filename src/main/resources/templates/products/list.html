@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <title>상품 목록</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+    th { background: #f9fafb; }
+    .toolbar { margin-bottom: 16px; display: flex; gap: 8px; }
+    .btn { display:inline-block; padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; text-decoration:none; }
+  </style>
+</head>
+<body>
+<h1>상품 목록</h1>
+
+<div class="toolbar">
+  <a class="btn" th:href="@{/products}">+ 상품 등록</a>
+  <a class="btn" th:href="@{/}">홈으로</a>
+</div>
+
+<table>
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>상품명</th>
+    <th>설명</th>
+    <th>가격</th>
+    <th>재고</th>
+    <th>등록일</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="p : ${products}">
+    <td th:text="${p.productId}">1</td>
+    <td th:text="${p.productName}">예시상품</td>
+    <td th:text="${p.description}">설명</td>
+    <td th:text="${#numbers.formatInteger(p.price, 0)}">10000</td>
+    <td th:text="${p.stockQuantity}">5</td>
+    <td th:text="${p.createdAt}">2025-09-14T12:00</td>
+  </tr>
+  <tr th:if="${#lists.isEmpty(products)}">
+    <td colspan="6">등록된 상품이 없습니다.</td>
+  </tr>
+  </tbody>
+</table>
+</body>
+</html>

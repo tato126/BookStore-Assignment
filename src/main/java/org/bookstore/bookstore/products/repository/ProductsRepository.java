@@ -1,4 +1,7 @@
 package org.bookstore.bookstore.products.repository;
 
-public interface ProductsRepository {
+import org.bookstore.bookstore.products.Products;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ProductsRepository extends JpaRepository<Products, Long> {
 }
