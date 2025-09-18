@@ -23,6 +23,7 @@ public class ProductInitializer implements CommandLineRunner {
             product.setStockQuantity(Long.valueOf(i));
             product.setDescription("Description " + i);
             product.setPrice(Long.valueOf(i));
+            productsRepository.save(product);
         }
     }
 }
