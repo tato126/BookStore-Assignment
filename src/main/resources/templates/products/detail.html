@@ -83,7 +83,7 @@
     </div>
     <div class="detail-row">
         <div class="detail-label">가격</div>
-        <div class="detail-value">₩<span th:text="${#numbers.formatInteger(product.price, 0)}">10,000</span></div>
+        <div class="detail-value" th:text="${#numbers.formatInteger(product.price, 0, 'COMMA')}+'원'">10,000원</div>
     </div>
     <div class="detail-row">
         <div class="detail-label">재고 수량</div>
@@ -91,11 +91,11 @@
     </div>
     <div class="detail-row">
         <div class="detail-label">등록일</div>
-        <div class="detail-value" th:text="${product.createdAt}">2025-09-14T12:00:00</div>
+        <div class="detail-value" th:text="${#temporals.format(product.createdAt, 'yyyy년 MM월 dd일 HH시 mm분 ss초')}">2025년 09월 14일 18시 20분 12초</div>
     </div>
     <div class="detail-row" th:if="${product.updatedAt}">
         <div class="detail-label">수정일</div>
-        <div class="detail-value" th:text="${product.updatedAt}">2025-09-14T13:00:00</div>
+        <div class="detail-value" th:text="${#temporals.format(product.updatedAt, 'yyyy년 MM월 dd일 HH시 mm분 ss초')}">2025년 09월 14일 18시 20분 12초</div>
     </div>
 </div>
 

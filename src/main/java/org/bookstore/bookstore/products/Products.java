@@ -27,18 +27,14 @@ public class Products {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // setter
-    public void setProductName(String name) {
-        this.productName = name;
-    }
-    public void setDescription(String description) {
+    public Products() {}
+
+    public Products(String productName, String description, int price, int stockQuantity) {
+        this.productName = productName;
         this.description = description;
-    }
-    public void setPrice(int price) {
         this.price = price;
-    }
-    public void setStockQuantity(int stock) {
-        this.stockQuantity = stock;
+        this.stockQuantity = stockQuantity;
+        this.createdAt = LocalDateTime.now();
     }
 
     // getter

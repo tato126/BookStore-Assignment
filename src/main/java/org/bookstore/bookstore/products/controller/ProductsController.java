@@ -5,10 +5,7 @@ import org.bookstore.bookstore.products.repository.ProductsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class ProductsController {
@@ -27,7 +24,7 @@ public class ProductsController {
 
     @GetMapping("/register")
     public String registerForm(Model model) {
-        model.addAttribute("product", new Products());
+        model.addAttribute("product", new Products()); // 컨트롤러에서 뷰(템플릿)로 데이터를 전달
         return "products/register";
     }
 
@@ -39,18 +36,22 @@ public class ProductsController {
     }
 
 
+    @GetMapping("/products/{id}")
+    public String detail(@PathVariable Long id, Model model) {
+        model.addAttribute("product", repository.findById(id).get());
+        // 에러 핸들러 추가
+        return "products/detail";
+    }
+
+
     @PostMapping("/products")
-    String addProduct(Products product,
+    String addProduct(
                       @RequestParam("name") String name,
                       @RequestParam("description") String description,
-                      @RequestParam("price") String price,
+                      @RequestParam("price") Integer price,
                       @RequestParam("stock") Integer stock
                     ){
-        product.setProductName(name);
-        product.setDescription(description);
-        product.setPrice(Integer.parseInt(price));
-        product.setStockQuantity(stock);
-
+        Products product = new Products(name, description, price, stock);
         repository.save(product); // Products 엔티티가 DB에 insert/update 된다.
 
         return "redirect:/products/list";
