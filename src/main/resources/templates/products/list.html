@@ -34,11 +34,13 @@
   <tbody>
   <tr th:each="p : ${products}">
     <td th:text="${p.productId}">1</td>
-    <td th:text="${p.productName}">예시상품</td>
+    <td>
+      <a th:href="@{|/products/${p.productId}|}" th:text="${p.productName}">예시상품</a>
+    </td>
     <td th:text="${p.description}">설명</td>
-    <td th:text="${#numbers.formatInteger(p.price, 0)}">10000</td>
+    <td th:text="${#numbers.formatInteger(p.price, 0, 'COMMA')} + '원'">10,000원</td>
     <td th:text="${p.stockQuantity}">5</td>
-    <td th:text="${p.createdAt}">2025-09-14T12:00</td>
+    <td th:text="${#temporals.format(p.createdAt, 'yyyy년 MM월 dd일 HH시 mm분 ss초')}">2025년 09월 14일 18시 20분 12초</td>
   </tr>
   <tr th:if="${#lists.isEmpty(products)}">
     <td colspan="6">등록된 상품이 없습니다.</td>
