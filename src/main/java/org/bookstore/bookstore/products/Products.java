@@ -15,7 +15,7 @@ public class Products {
 
 //    private ProductCategory productCategory;
 //    private int discountRate;
-//    private String imageUrl;
+    private String imageUrl;
 //    private double rating;
 //    private int salesCount;
 //    private Boolean isActive;
@@ -27,14 +27,17 @@ public class Products {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+
     public Products() {}
 
-    public Products(String productName, String description, int price, int stockQuantity) {
+    public Products(String productName, String description, String imageUrl, int price, int stockQuantity) {
         this.productName = productName;
         this.description = description;
+        this.imageUrl = imageUrl;
         this.price = price;
         this.stockQuantity = stockQuantity;
         this.createdAt = LocalDateTime.now();
+
     }
 
     // getter
@@ -59,4 +62,5 @@ public class Products {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
+    public String getImageUrl() { return imageUrl; }
 }

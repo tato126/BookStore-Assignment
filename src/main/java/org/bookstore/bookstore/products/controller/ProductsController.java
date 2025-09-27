@@ -16,9 +16,9 @@ public class ProductsController {
     }
 
     @GetMapping("/")
-    @ResponseBody
-    String hello() {
-        return "굿모닝!";
+    public String list(Model model) {
+        model.addAttribute("products", repository.findAll());
+        return "products/list";
     }
 
 
@@ -26,13 +26,6 @@ public class ProductsController {
     public String registerForm(Model model) {
         model.addAttribute("product", new Products()); // 컨트롤러에서 뷰(템플릿)로 데이터를 전달
         return "products/register";
-    }
-
-
-    @GetMapping("/products/list")
-    public String list(Model model) {
-        model.addAttribute("products", repository.findAll());
-        return "products/list";
     }
 
 
@@ -48,12 +41,13 @@ public class ProductsController {
     String addProduct(
                       @RequestParam("name") String name,
                       @RequestParam("description") String description,
+                      @RequestParam("imageUrl") String imageUrl,
                       @RequestParam("price") Integer price,
                       @RequestParam("stock") Integer stock
                     ){
-        Products product = new Products(name, description, price, stock);
+        Products product = new Products(name, description, imageUrl, price, stock);
         repository.save(product); // Products 엔티티가 DB에 insert/update 된다.
 
-        return "redirect:/products/list";
+        return "redirect:/";
     }
 }
