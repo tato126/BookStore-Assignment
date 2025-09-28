@@ -13,7 +13,7 @@
   </style>
 </head>
 <body>
-<h1>상품 목록</h1>
+<h1>현재 판매 중인 도서 📚</h1>
 
 <div class="toolbar">
   <a class="btn" th:href="@{/register}">+ 상품 등록</a>
@@ -25,6 +25,7 @@
   <tr>
     <th>ID</th>
     <th>상품명</th>
+    <th>책 표지</th>
     <th>설명</th>
     <th>가격</th>
     <th>재고</th>
@@ -36,6 +37,9 @@
     <td th:text="${p.productId}">1</td>
     <td>
       <a th:href="@{|/products/${p.productId}|}" th:text="${p.productName}">예시상품</a>
+    </td>
+    <td>
+      <img th:src="${p.imageUrl}" alt="책 이미지" style="max-width:80px; height:auto; display:block; margin-top:4px;"/>
     </td>
     <td th:text="${p.description}">설명</td>
     <td th:text="${#numbers.formatInteger(p.price, 0, 'COMMA')} + '원'">10,000원</td>

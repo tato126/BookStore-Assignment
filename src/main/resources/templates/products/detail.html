@@ -78,6 +78,12 @@
         <div class="detail-value" th:text="${product.productName}">예시 상품</div>
     </div>
     <div class="detail-row">
+        <div class="detail-label">책 표지</div>
+        <div class="detail-value">
+            <img th:src="${product.imageUrl}" alt="책 표지 이미지" style="max-width:200px; height:auto;">
+        </div>
+    </div>
+    <div class="detail-row">
         <div class="detail-label">설명</div>
         <div class="detail-value" th:text="${product.description}">상품 설명입니다</div>
     </div>
