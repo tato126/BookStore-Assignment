@@ -9,34 +9,41 @@
             margin: 24px;
             max-width: 800px;
         }
+
         .product-detail {
             background: #f9fafb;
             padding: 24px;
             border-radius: 12px;
             margin-top: 24px;
         }
+
         .detail-row {
             display: flex;
             padding: 12px 0;
             border-bottom: 1px solid #e5e7eb;
         }
+
         .detail-row:last-child {
             border-bottom: none;
         }
+
         .detail-label {
             font-weight: 600;
             width: 120px;
             color: #374151;
         }
+
         .detail-value {
             flex: 1;
             color: #111827;
         }
+
         .toolbar {
             margin-top: 24px;
             display: flex;
             gap: 12px;
         }
+
         .btn {
             display: inline-block;
             padding: 10px 16px;
@@ -46,25 +53,108 @@
             background: white;
             color: #374151;
             transition: background-color 0.2s;
+            cursor: pointer;
         }
+
         .btn:hover {
             background: #f3f4f6;
         }
+
         .btn-primary {
             background: #3b82f6;
             color: white;
             border-color: #3b82f6;
         }
+
         .btn-primary:hover {
             background: #2563eb;
         }
+
         h1 {
             color: #111827;
             margin-bottom: 8px;
         }
+
         .product-id {
             color: #6b7280;
             font-size: 14px;
+        }
+
+        .purchase-actions {
+            margin-top: 24px;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .qty-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 8px;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .qty-input {
+            width: 72px;
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .qty-stepper {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .step-btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-icon {
+            display: inline-flex;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        .btn-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .qty-label {
+            min-width: 36px;
+        }
+
+        /* input에 기본 화살표 제거 */
+        /* Chrome, Safari, Edge, Opera */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
         }
     </style>
 </head>
@@ -97,12 +187,49 @@
     </div>
     <div class="detail-row">
         <div class="detail-label">등록일</div>
-        <div class="detail-value" th:text="${#temporals.format(product.createdAt, 'yyyy년 MM월 dd일 HH시 mm분 ss초')}">2025년 09월 14일 18시 20분 12초</div>
+        <div class="detail-value" th:text="${#temporals.format(product.createdAt, 'yyyy년 MM월 dd일 HH시 mm분 ss초')}">2025년
+            09월 14일 18시 20분 12초
+        </div>
     </div>
     <div class="detail-row" th:if="${product.updatedAt}">
         <div class="detail-label">수정일</div>
-        <div class="detail-value" th:text="${#temporals.format(product.updatedAt, 'yyyy년 MM월 dd일 HH시 mm분 ss초')}">2025년 09월 14일 18시 20분 12초</div>
+        <div class="detail-value" th:text="${#temporals.format(product.updatedAt, 'yyyy년 MM월 dd일 HH시 mm분 ss초')}">2025년
+            09월 14일 18시 20분 12초
+        </div>
     </div>
+</div>
+
+<div class="purchase-actions">
+    <form method="post" th:action="@{/cart/add}" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <!-- CSRF 토큰 (있을 때만 렌더링) -->
+        <th:block th:if="${_csrf != null}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        </th:block>
+
+        <input type="hidden" name="productId" th:value="${product.productId}"/>
+        <div class="qty-group">
+            <span class="qty-label">이 상품이 마음에 드나요?</span>
+            <div class="qty-stepper">
+                <button type="button" class="step-btn" id="qty-decrease" aria-label="수량 감소">−</button>
+                <input id="qty" class="qty-input" type="number" name="qty" min="1" value="1" inputmode="numeric"
+                       th:attr="max=${product.stockQuantity > 10 ? 10 : product.stockQuantity}, data-max=${product.stockQuantity > 10 ? 10 : product.stockQuantity}"/>
+                <button type="button" class="step-btn" id="qty-increase" aria-label="수량 증가">+</button>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit">
+            <span class="btn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3h2l2.4 12.1a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L21 7H6" stroke="currentColor"
+                          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="10" cy="20" r="1.5" fill="currentColor"/>
+                    <circle cx="17" cy="20" r="1.5" fill="currentColor"/>
+                </svg>
+            </span>
+            장바구니에 넣기
+        </button>
+        <button class="btn" type="submit" th:formaction="@{/orders/buy-now}">바로 구매하기</button>
+    </form>
 </div>
 
 <div class="toolbar">
@@ -112,4 +239,51 @@
 </div>
 
 </body>
+<script>
+    // 커스텀 버튼으로 수량 변경 (+, -) + 최대 수량(최대 10, 재고 중 최소값) 강제
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('qty');
+        const dec = document.getElementById('qty-decrease');
+        const inc = document.getElementById('qty-increase');
+        if (!input || !dec || !inc) return;
+
+        const maxAttr = parseInt(input.getAttribute('max') || input.dataset.max || '10', 10);
+        const MAX_QTY = isNaN(maxAttr) ? 10 : maxAttr; // 안전 장치
+
+        function clamp(v) {
+            let n = parseInt(v, 10);
+            if (isNaN(n) || n < 1) n = 1;
+            if (n > MAX_QTY) n = MAX_QTY;
+            return n;
+        }
+
+        function sync() {
+            input.value = clamp(input.value);
+            const val = parseInt(input.value, 10) || 1;
+            dec.disabled = val <= 1;
+            inc.disabled = val >= MAX_QTY;
+        }
+
+        dec.addEventListener('click', function () {
+            input.value = clamp((parseInt(input.value || '1', 10) - 1));
+            sync();
+        });
+        inc.addEventListener('click', function () {
+            input.value = clamp((parseInt(input.value || '1', 10) + 1));
+            sync();
+        });
+        input.addEventListener('input', sync);
+
+        // 폼 제출 시에도 최종 보정
+        const form = input.closest('form');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                input.value = clamp(input.value);
+            });
+        }
+
+        // 초기 상태 동기화
+        sync();
+    });
+</script>
 </html>
