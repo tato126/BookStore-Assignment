@@ -3,9 +3,11 @@ package org.bookstore.bookstore.products.controller;
 import org.bookstore.bookstore.products.Products;
 import org.bookstore.bookstore.products.repository.ProductsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 public class ProductsController {
@@ -31,8 +33,10 @@ public class ProductsController {
 
     @GetMapping("/products/{id}")
     public String detail(@PathVariable Long id, Model model) {
-        model.addAttribute("product", repository.findById(id).get());
-        // 에러 핸들러 추가
+        Products product = repository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다.")
+        );
+        model.addAttribute("product", product);
         return "products/detail";
     }
 
