@@ -6,12 +6,27 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 500px;
+            max-width: 600px;
             margin: 50px auto;
             padding: 20px;
         }
         h1 {
             color: #333;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
         form {
             display: flex;
@@ -26,6 +41,18 @@
             margin-top: 5px;
             border: 1px solid #ddd;
             border-radius: 4px;
+        }
+        .image-upload-section {
+            border: 1px dashed #ddd;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .image-upload-section p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
         }
         button {
             margin-top: 20px;
@@ -44,22 +71,35 @@
 </head>
 <body>
     <h1>상품 등록</h1>
-    <form th:action="@{/products}" method="post">
-        <label for="name">상품명:</label>
-        <input type="text" id="name" name="name" required>
+
+    <!-- 성공/오류 메시지 표시 -->
+    <div th:if="${success}" class="message success" th:text="${success}"></div>
+    <div th:if="${error}" class="message error" th:text="${error}"></div>
+
+    <form th:action="@{/admin/product/register}" method="post" enctype="multipart/form-data">
+        <label for="productName">상품명:</label>
+        <input type="text" id="productName" name="productName" required>
 
         <label for="description">설명:</label>
-        <textarea id="description" name="description" rows="4"></textarea>
+        <textarea id="description" name="description" rows="4" required></textarea>
 
-        <!--이미지 url 기능 추가-->
-        <label for="imageUrl">이미지 URL</label>
-        <input type="text" id="imageUrl" name="imageUrl" required>
+        <div class="image-upload-section">
+            <label for="imageFile">이미지 파일 업로드:</label>
+            <input type="file" id="imageFile" name="imageFile" accept="image/*">
+            <p>또는</p>
+            <label for="imageUrl">이미지 URL 입력:</label>
+            <input type="text" id="imageUrl" name="imageUrl" placeholder="http://...">
+            <p style="font-size: 12px; color: #999;">※ 파일 업로드와 URL 중 하나만 선택하면 됩니다. 파일 업로드가 우선됩니다.</p>
+        </div>
 
         <label for="price">가격:</label>
-        <input type="number" id="price" name="price" step="0.01" min="0" required>
+        <input type="number" id="price" name="price" min="0" required>
 
-        <label for="stock">재고:</label>
-        <input type="number" id="stock" name="stock" min="0" required>
+        <label for="stockQuantity">재고:</label>
+        <input type="number" id="stockQuantity" name="stockQuantity" min="0" required>
+
+        <label for="bookSize">책 크기:</label>
+        <input type="number" id="bookSize" name="bookSize" min="1" required>
 
         <button type="submit">상품 등록</button>
     </form>
