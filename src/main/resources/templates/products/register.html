@@ -67,6 +67,24 @@
         button:hover {
             background-color: #45a049;
         }
+        .validation-error {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        .validation-error.show {
+            display: block;
+        }
+        input.invalid, textarea.invalid {
+            border-color: #d32f2f;
+            background-color: #fff0f0;
+        }
+        .field-info {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -76,12 +94,14 @@
     <div th:if="${success}" class="message success" th:text="${success}"></div>
     <div th:if="${error}" class="message error" th:text="${error}"></div>
 
-    <form th:action="@{/admin/product/register}" method="post" enctype="multipart/form-data">
-        <label for="productName">상품명:</label>
+    <form th:action="@{/admin/product/register}" method="post" enctype="multipart/form-data" id="productForm">
+        <label for="productName">상품명:<span style="color: red;">*</span></label>
         <input type="text" id="productName" name="productName" required>
+        <span class="validation-error" id="productNameError"></span>
 
-        <label for="description">설명:</label>
+        <label for="description">설명:<span style="color: red;">*</span></label>
         <textarea id="description" name="description" rows="4" required></textarea>
+        <span class="validation-error" id="descriptionError"></span>
 
         <div class="image-upload-section">
             <label for="imageFile">이미지 파일 업로드:</label>
@@ -92,16 +112,151 @@
             <p style="font-size: 12px; color: #999;">※ 파일 업로드와 URL 중 하나만 선택하면 됩니다. 파일 업로드가 우선됩니다.</p>
         </div>
 
-        <label for="price">가격:</label>
-        <input type="number" id="price" name="price" min="0" required>
+        <label for="price">가격:<span style="color: red;">*</span></label>
+        <input type="number" id="price" name="price" min="0" max="1000000" required>
+        <span class="field-info">0원 이상 ~ 1,000,000원 이하</span>
+        <span class="validation-error" id="priceError"></span>
 
-        <label for="stockQuantity">재고:</label>
+        <label for="stockQuantity">재고:<span style="color: red;">*</span></label>
         <input type="number" id="stockQuantity" name="stockQuantity" min="0" required>
+        <span class="field-info">0개 이상</span>
+        <span class="validation-error" id="stockQuantityError"></span>
 
-        <label for="bookSize">책 크기:</label>
+        <label for="bookSize">책 크기:<span style="color: red;">*</span></label>
         <input type="number" id="bookSize" name="bookSize" min="1" required>
+        <span class="field-info">1 이상</span>
+        <span class="validation-error" id="bookSizeError"></span>
 
         <button type="submit">상품 등록</button>
     </form>
+
+    <script>
+        // 폼 요소 가져오기
+        const form = document.getElementById('productForm');
+        const productName = document.getElementById('productName');
+        const description = document.getElementById('description');
+        const price = document.getElementById('price');
+        const stockQuantity = document.getElementById('stockQuantity');
+        const bookSize = document.getElementById('bookSize');
+
+        // 에러 메시지 요소
+        const productNameError = document.getElementById('productNameError');
+        const descriptionError = document.getElementById('descriptionError');
+        const priceError = document.getElementById('priceError');
+        const stockQuantityError = document.getElementById('stockQuantityError');
+        const bookSizeError = document.getElementById('bookSizeError');
+
+        // 유효성 검사 함수
+        function validateProductName() {
+            if (!productName.value.trim()) {
+                showError(productName, productNameError, '상품 이름은 필수입니다');
+                return false;
+            }
+            hideError(productName, productNameError);
+            return true;
+        }
+
+        function validateDescription() {
+            if (!description.value.trim()) {
+                showError(description, descriptionError, '상품 설명은 필수입니다');
+                return false;
+            }
+            hideError(description, descriptionError);
+            return true;
+        }
+
+        function validatePrice() {
+            const value = parseInt(price.value);
+            if (isNaN(value)) {
+                showError(price, priceError, '가격은 필수입니다');
+                return false;
+            }
+            if (value < 0) {
+                showError(price, priceError, '가격은 0원 이상이어야 합니다');
+                return false;
+            }
+            if (value > 1000000) {
+                showError(price, priceError, '최대 가격은 1,000,000원 이하여야 합니다');
+                return false;
+            }
+            hideError(price, priceError);
+            return true;
+        }
+
+        function validateStockQuantity() {
+            const value = parseInt(stockQuantity.value);
+            if (isNaN(value)) {
+                showError(stockQuantity, stockQuantityError, '재고 수량은 필수입니다');
+                return false;
+            }
+            if (value < 0) {
+                showError(stockQuantity, stockQuantityError, '재고 수량은 0개 이상이어야 합니다');
+                return false;
+            }
+            hideError(stockQuantity, stockQuantityError);
+            return true;
+        }
+
+        function validateBookSize() {
+            const value = parseInt(bookSize.value);
+            if (isNaN(value)) {
+                showError(bookSize, bookSizeError, '책 크기는 필수입니다');
+                return false;
+            }
+            if (value < 1) {
+                showError(bookSize, bookSizeError, '책 크기는 1 이상이어야 합니다');
+                return false;
+            }
+            hideError(bookSize, bookSizeError);
+            return true;
+        }
+
+        // 에러 표시 함수
+        function showError(input, errorElement, message) {
+            input.classList.add('invalid');
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+
+        // 에러 숨김 함수
+        function hideError(input, errorElement) {
+            input.classList.remove('invalid');
+            errorElement.classList.remove('show');
+        }
+
+        // 실시간 유효성 검사 이벤트 리스너
+        productName.addEventListener('blur', validateProductName);
+        description.addEventListener('blur', validateDescription);
+        price.addEventListener('blur', validatePrice);
+        price.addEventListener('input', validatePrice);
+        stockQuantity.addEventListener('blur', validateStockQuantity);
+        stockQuantity.addEventListener('input', validateStockQuantity);
+        bookSize.addEventListener('blur', validateBookSize);
+        bookSize.addEventListener('input', validateBookSize);
+
+        // 폼 제출 시 전체 유효성 검사
+        form.addEventListener('submit', function(event) {
+            // 모든 필드 검사
+            const isProductNameValid = validateProductName();
+            const isDescriptionValid = validateDescription();
+            const isPriceValid = validatePrice();
+            const isStockQuantityValid = validateStockQuantity();
+            const isBookSizeValid = validateBookSize();
+
+            // 하나라도 유효하지 않으면 제출 방지
+            if (!isProductNameValid || !isDescriptionValid || !isPriceValid ||
+                !isStockQuantityValid || !isBookSizeValid) {
+                event.preventDefault();
+                alert('입력값을 확인해주세요. 모든 필수 항목을 올바르게 입력해야 합니다.');
+
+                // 첫 번째 에러 필드로 스크롤
+                const firstInvalidField = document.querySelector('.invalid');
+                if (firstInvalidField) {
+                    firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalidField.focus();
+                }
+            }
+        });
+    </script>
 </body>
 </html>

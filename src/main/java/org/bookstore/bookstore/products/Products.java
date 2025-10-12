@@ -1,9 +1,11 @@
 package org.bookstore.bookstore.products;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,14 +28,16 @@ public class Products {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long productId; // 상품 아이디
 
-    private String imageUrl; // 이미지 url
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String imageUrl; // 이미지 url (Base64 데이터 포함 가능)
 
     private int bookSize; // 책 사이즈
 
     private String productName; // 상품 이름
     private String description; // 상품 설명
     private int price; // 상품 가격
-    private int stockQuantity; // 상품 가격
+    private int stockQuantity; // 상품 수량
 
     @CreatedDate
     private LocalDateTime createdAt; // 상품 생성일
