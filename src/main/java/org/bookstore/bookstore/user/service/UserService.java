@@ -73,4 +73,12 @@ public class UserService {
                 user.getCreatedAt()
         );
     }
+
+    /**
+     * ID로 사용자 조회 (장바구니용)
+     */
+    public Optional<Users> findById(Long userId) {
+        return usersRepository.findById(userId);
+    }
+
 }
