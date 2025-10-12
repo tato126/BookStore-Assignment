@@ -47,6 +47,13 @@ public class ProductService {
                 .stockQuantity(productCreateRequest.stockQuantity())
                 .imageUrl(productCreateRequest.imageUrl())
                 .bookSize(productCreateRequest.bookSize())
+                // 알라딘 API 필드
+                .isbn(productCreateRequest.isbn())
+                .author(productCreateRequest.author())
+                .publisher(productCreateRequest.publisher())
+                .publishDate(productCreateRequest.publishDate())
+                .originalPrice(productCreateRequest.originalPrice())
+                .category(productCreateRequest.category())
                 .build();
 
         // 상품 저장
