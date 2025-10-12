@@ -2,10 +2,13 @@ package org.bookstore.bookstore.products.controller.create;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.bookstore.bookstore.category.CategoryLevel;
+import org.bookstore.bookstore.category.CategoryService;
 import org.bookstore.bookstore.products.dto.request.ProductCreateRequest;
 import org.bookstore.bookstore.products.service.FileUploadService;
 import org.bookstore.bookstore.products.service.ProductService;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +31,7 @@ public class ProductCreateController {
 
     private final ProductService productService;
     private final FileUploadService fileUploadService;
+    private final CategoryService categoryService;
 
     /**
      * 상품 등록 페이지를 반환합니다.
@@ -35,7 +39,8 @@ public class ProductCreateController {
      * @return 상품 등록 뷰
      */
     @GetMapping("/register")
-    public String getRegisterPage() {
+    public String getRegisterPage(Model model) {
+        model.addAttribute("largeCategories", categoryService.getCategoriesByLevel(CategoryLevel.LARGE));
         return "products/register";
     }
 
@@ -77,6 +82,7 @@ public class ProductCreateController {
                     .stockQuantity(productCreateRequest.stockQuantity())
                     .imageUrl(imageUrl)
                     .bookSize(productCreateRequest.bookSize())
+                    .categoryId(productCreateRequest.categoryId())
                     .build();
 
             // 상품 등록
@@ -94,4 +100,3 @@ public class ProductCreateController {
         return "redirect:/";
     }
 }
-

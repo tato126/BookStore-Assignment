@@ -36,7 +36,7 @@
             margin-top: 10px;
             font-weight: bold;
         }
-        input, textarea {
+        input, textarea, select {
             padding: 8px;
             margin-top: 5px;
             border: 1px solid #ddd;
@@ -80,10 +80,24 @@
             border-color: #d32f2f;
             background-color: #fff0f0;
         }
+        select.invalid {
+            border-color: #d32f2f;
+            background-color: #fff0f0;
+        }
         .field-info {
             color: #666;
             font-size: 12px;
             margin-top: 5px;
+        }
+        .category-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .category-selects {
+            display: grid;
+            gap: 8px;
         }
     </style>
 </head>
@@ -112,6 +126,27 @@
             <p style="font-size: 12px; color: #999;">※ 파일 업로드와 URL 중 하나만 선택하면 됩니다. 파일 업로드가 우선됩니다.</p>
         </div>
 
+        <div class="category-group">
+            <label>카테고리 선택:<span style="color: red;">*</span></label>
+            <div class="category-selects">
+                <select id="largeCategory" required>
+                    <option value="">대분류를 선택하세요</option>
+                    <option th:each="category : ${largeCategories}"
+                            th:value="${category.id}"
+                            th:text="${category.name}"></option>
+                </select>
+
+                <select id="mediumCategory" disabled>
+                    <option value="">중분류를 선택하세요</option>
+                </select>
+
+                <select id="smallCategory" name="categoryId" disabled required>
+                    <option value="">소분류를 선택하세요</option>
+                </select>
+                <span class="validation-error" id="categoryError"></span>
+            </div>
+        </div>
+
         <label for="price">가격:<span style="color: red;">*</span></label>
         <input type="number" id="price" name="price" min="0" max="1000000" required>
         <span class="field-info">0원 이상 ~ 1,000,000원 이하</span>
@@ -138,6 +173,9 @@
         const price = document.getElementById('price');
         const stockQuantity = document.getElementById('stockQuantity');
         const bookSize = document.getElementById('bookSize');
+        const largeCategory = document.getElementById('largeCategory');
+        const mediumCategory = document.getElementById('mediumCategory');
+        const smallCategory = document.getElementById('smallCategory');
 
         // 에러 메시지 요소
         const productNameError = document.getElementById('productNameError');
@@ -145,6 +183,7 @@
         const priceError = document.getElementById('priceError');
         const stockQuantityError = document.getElementById('stockQuantityError');
         const bookSizeError = document.getElementById('bookSizeError');
+        const categoryError = document.getElementById('categoryError');
 
         // 유효성 검사 함수
         function validateProductName() {
@@ -211,6 +250,15 @@
             return true;
         }
 
+        function validateCategory() {
+            if (!smallCategory.value) {
+                showError(smallCategory, categoryError, '소분류까지 선택해야 합니다');
+                return false;
+            }
+            hideError(smallCategory, categoryError);
+            return true;
+        }
+
         // 에러 표시 함수
         function showError(input, errorElement, message) {
             input.classList.add('invalid');
@@ -224,6 +272,80 @@
             errorElement.classList.remove('show');
         }
 
+        function resetSelect(selectElement, placeholder) {
+            selectElement.innerHTML = '';
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = placeholder;
+            selectElement.appendChild(option);
+            selectElement.value = '';
+        }
+
+        async function fetchCategories(level, parentId) {
+            const params = new URLSearchParams({ level });
+            if (parentId) {
+                params.append('parentId', parentId);
+            }
+
+            const response = await fetch(`/api/categories?${params.toString()}`);
+            if (!response.ok) {
+                throw new Error('카테고리 정보를 불러오지 못했습니다.');
+            }
+            return response.json();
+        }
+
+        function populateSelect(selectElement, categories, placeholder) {
+            resetSelect(selectElement, placeholder);
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                selectElement.appendChild(option);
+            });
+        }
+
+        largeCategory.addEventListener('change', async () => {
+            const largeId = largeCategory.value;
+            resetSelect(mediumCategory, '중분류를 선택하세요');
+            resetSelect(smallCategory, '소분류를 선택하세요');
+            mediumCategory.disabled = true;
+            smallCategory.disabled = true;
+            hideError(smallCategory, categoryError);
+
+            if (!largeId) {
+                return;
+            }
+
+            try {
+                const categories = await fetchCategories('MEDIUM', largeId);
+                populateSelect(mediumCategory, categories, '중분류를 선택하세요');
+                mediumCategory.disabled = false;
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        mediumCategory.addEventListener('change', async () => {
+            const mediumId = mediumCategory.value;
+            resetSelect(smallCategory, '소분류를 선택하세요');
+            smallCategory.disabled = true;
+            hideError(smallCategory, categoryError);
+
+            if (!mediumId) {
+                return;
+            }
+
+            try {
+                const categories = await fetchCategories('SMALL', mediumId);
+                populateSelect(smallCategory, categories, '소분류를 선택하세요');
+                smallCategory.disabled = false;
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+
+        smallCategory.addEventListener('change', validateCategory);
+
         // 실시간 유효성 검사 이벤트 리스너
         productName.addEventListener('blur', validateProductName);
         description.addEventListener('blur', validateDescription);
@@ -233,6 +355,7 @@
         stockQuantity.addEventListener('input', validateStockQuantity);
         bookSize.addEventListener('blur', validateBookSize);
         bookSize.addEventListener('input', validateBookSize);
+        largeCategory.addEventListener('change', validateCategory);
 
         // 폼 제출 시 전체 유효성 검사
         form.addEventListener('submit', function(event) {
@@ -242,10 +365,11 @@
             const isPriceValid = validatePrice();
             const isStockQuantityValid = validateStockQuantity();
             const isBookSizeValid = validateBookSize();
+            const isCategoryValid = validateCategory();
 
             // 하나라도 유효하지 않으면 제출 방지
             if (!isProductNameValid || !isDescriptionValid || !isPriceValid ||
-                !isStockQuantityValid || !isBookSizeValid) {
+                !isStockQuantityValid || !isBookSizeValid || !isCategoryValid) {
                 event.preventDefault();
                 alert('입력값을 확인해주세요. 모든 필수 항목을 올바르게 입력해야 합니다.');
 
