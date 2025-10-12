@@ -1,5 +1,6 @@
 package org.bookstore.bookstore.products.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.bookstore.bookstore.products.Products;
 import org.bookstore.bookstore.products.dto.request.ProductCreateRequest;
@@ -8,6 +9,7 @@ import org.bookstore.bookstore.products.repository.ProductsRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
 
@@ -17,6 +19,7 @@ import java.util.Optional;
  *
  * @author chan
  */
+@Validated
 @RequiredArgsConstructor
 @Service
 public class ProductService {
@@ -37,7 +40,7 @@ public class ProductService {
      * @param productCreateRequest 상품 생성 요청 DTO
      * @return 저장된 Products 엔티티
      */
-    public Products registerProduct(ProductCreateRequest productCreateRequest) {
+    public Products registerProduct(@Valid ProductCreateRequest productCreateRequest) {
 
         // 엔티티 변환
         Products products = Products.builder()

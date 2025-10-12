@@ -63,13 +63,14 @@ public class AladinController {
     /**
      * 알라딘 베스트셀러 조회 API (AJAX).
      *
+     * @param page 페이지 번호 (기본값: 1)
      * @return 베스트셀러 목록 JSON
      */
     @GetMapping("/api/bestsellers")
     @ResponseBody
-    public AladinSearchResponse getBestsellers() {
-        log.debug("알라딘 베스트셀러 API 호출");
-        return aladinApiService.getBestsellers("Bestseller");
+    public AladinSearchResponse getBestsellers(@RequestParam(defaultValue = "1") int page) {
+        log.debug("알라딘 베스트셀러 API 호출: page={}", page);
+        return aladinApiService.getBestsellers("Bestseller", page);
     }
 
     /**
@@ -131,7 +132,7 @@ public class AladinController {
 
             log.debug("알라딘 도서 등록 성공: productId={}", product.getProductId());
 
-            return "redirect:/products/list";
+            return "redirect:/";
 
         } catch (IllegalArgumentException e) {
             // 중복 ISBN 등 비즈니스 로직 에러

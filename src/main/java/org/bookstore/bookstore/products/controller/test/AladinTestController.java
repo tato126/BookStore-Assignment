@@ -36,13 +36,14 @@ public class AladinTestController {
 
     /**
      * 베스트셀러 조회 테스트.
-     * 예시: http://localhost:8080/test/aladin/bestsellers
+     * 예시: http://localhost:8080/test/aladin/bestsellers?page=1
      *
+     * @param page 페이지 번호 (기본값: 1)
      * @return 베스트셀러 목록
      */
     @GetMapping("/bestsellers")
-    public AladinSearchResponse testBestsellers() {
-        return aladinApiService.getBestsellers("Bestseller");
+    public AladinSearchResponse testBestsellers(@RequestParam(defaultValue = "1") int page) {
+        return aladinApiService.getBestsellers("Bestseller", page);
     }
 
     /**

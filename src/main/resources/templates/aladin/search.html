@@ -213,7 +213,7 @@
 </head>
 <body>
 <div class="container">
-    <button class="btn btn-back" onclick="location.href='/products/list'">← 상품 목록으로</button>
+    <button class="btn btn-back" onclick="location.href='/'">← 상품 목록으로</button>
 
     <h1>📚 알라딘 도서 검색</h1>
 
@@ -295,14 +295,14 @@
     }
 
     // 베스트셀러 조회
-    function loadBestsellers() {
+    function loadBestsellers(page = 1) {
         currentQuery = '';
-        currentPage = 1;
+        currentPage = page;
         isBestseller = true;
 
         showLoading();
 
-        fetch('/admin/aladin/api/bestsellers')
+        fetch(`/admin/aladin/api/bestsellers?page=${page}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('베스트셀러 조회 실패');
@@ -341,9 +341,14 @@
             bookGrid.appendChild(bookItem);
         });
 
-        // 페이지네이션 (검색인 경우만)
-        if (!isBestseller && data.totalResults > 10) {
-            createPagination(data.totalResults, data.startIndex, 10);
+        // 페이지네이션
+        // 검색: totalResults가 itemsPerPage보다 크면 페이지네이션 표시
+        // 베스트셀러: totalResults가 없으면 페이지네이션 없음
+        const itemsPerPage = data.itemsPerPage || 10;
+        const totalResults = data.totalResults || 0;
+
+        if (totalResults > itemsPerPage) {
+            createPagination(totalResults, currentPage, itemsPerPage);
         } else {
             document.getElementById('pagination').innerHTML = '';
         }
@@ -365,30 +370,45 @@
     }
 
     // 페이지네이션 생성
-    function createPagination(total, start, maxResults) {
-        const totalPages = Math.ceil(total / maxResults);
-        const currentPage = Math.ceil(start / maxResults) + 1;
+    function createPagination(total, page, itemsPerPage) {
+        const totalPages = Math.ceil(total / itemsPerPage);
         const paginationDiv = document.getElementById('pagination');
 
         paginationDiv.innerHTML = '';
 
-        if (currentPage > 1) {
+        // 이전 버튼
+        if (page > 1) {
             const prevBtn = document.createElement('button');
             prevBtn.className = 'btn btn-primary';
             prevBtn.textContent = '이전';
-            prevBtn.onclick = () => searchBooks(currentPage - 1);
+            prevBtn.onclick = () => {
+                if (isBestseller) {
+                    loadBestsellers(page - 1);
+                } else {
+                    searchBooks(page - 1);
+                }
+            };
             paginationDiv.appendChild(prevBtn);
         }
 
+        // 페이지 정보
         const pageInfo = document.createElement('span');
-        pageInfo.textContent = `${currentPage} / ${totalPages}`;
+        pageInfo.textContent = `${page} / ${totalPages} (전체 ${total}개)`;
+        pageInfo.style.margin = '0 15px';
         paginationDiv.appendChild(pageInfo);
 
-        if (currentPage < totalPages) {
+        // 다음 버튼
+        if (page < totalPages) {
             const nextBtn = document.createElement('button');
             nextBtn.className = 'btn btn-primary';
             nextBtn.textContent = '다음';
-            nextBtn.onclick = () => searchBooks(currentPage + 1);
+            nextBtn.onclick = () => {
+                if (isBestseller) {
+                    loadBestsellers(page + 1);
+                } else {
+                    searchBooks(page + 1);
+                }
+            };
             paginationDiv.appendChild(nextBtn);
         }
     }

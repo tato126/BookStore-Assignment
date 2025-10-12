@@ -72,9 +72,21 @@ public record AladinBookItem(
             }
         }
 
+        // @NotBlank 검증을 위한 description 처리
+        String validDescription = description;
+        if (validDescription == null || validDescription.trim().isEmpty()) {
+            validDescription = "도서 설명이 제공되지 않았습니다.";
+        }
+
+        // @NotBlank 검증을 위한 title 처리
+        String validTitle = title;
+        if (validTitle == null || validTitle.trim().isEmpty()) {
+            validTitle = "제목 없음";
+        }
+
         return ProductCreateRequest.builder()
-                .productName(title)
-                .description(description != null ? description : "")
+                .productName(validTitle)
+                .description(validDescription)
                 .price(priceSales != null ? priceSales : 0)
                 .stockQuantity(stockQuantity)
                 .imageUrl(cover)

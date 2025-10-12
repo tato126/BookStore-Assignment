@@ -58,15 +58,16 @@ public class AladinApiService {
      * 베스트셀러 목록을 조회합니다.
      *
      * @param queryType 베스트셀러 타입 (Bestseller, BlogBest 등)
+     * @param page      페이지 번호 (1부터 시작)
      * @return 베스트셀러 목록
      */
-    public AladinSearchResponse getBestsellers(String queryType) {
+    public AladinSearchResponse getBestsellers(String queryType, int page) {
         String url = String.format(
-                "%s/ItemList.aspx?ttbkey=%s&QueryType=%s&MaxResults=20&SearchTarget=Book&output=js&Version=20131101",
-                apiUrl, apiKey, queryType
+                "%s/ItemList.aspx?ttbkey=%s&QueryType=%s&MaxResults=10&start=%d&SearchTarget=Book&output=js&Version=20131101",
+                apiUrl, apiKey, queryType, page
         );
 
-        log.info("알라딘 API 호출: 베스트셀러 - queryType={}", queryType);
+        log.info("알라딘 API 호출: 베스트셀러 - queryType={}, page={}", queryType, page);
 
         try {
             return webClient.get()
