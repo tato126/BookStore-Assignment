@@ -3,7 +3,10 @@ package org.bookstore.bookstore.products.service;
 import lombok.RequiredArgsConstructor;
 import org.bookstore.bookstore.products.Products;
 import org.bookstore.bookstore.products.dto.request.ProductCreateRequest;
+import org.bookstore.bookstore.products.dto.response.ProductListResponse;
 import org.bookstore.bookstore.products.repository.ProductsRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,5 +42,19 @@ public class ProductService {
 
         // 상품 저장
         return productsRepository.save(products);
+    }
+
+    /**
+     * 전체 상품 목록을 페이징하여 조회합니다.
+     *
+     * @param pageable 페이징 정보 (페이지 번호, 크기, 정렬)
+     * @return 페이징 처리된 상품 목록 응답 DTO
+     */
+    public Page<ProductListResponse> findAllProducts(Pageable pageable) {
+        // 상품 조회
+        Page<Products> productsPage = productsRepository.findAll(pageable);
+
+        // 엔티티 → DTO 변환
+        return productsPage.map(ProductListResponse::from);
     }
 }

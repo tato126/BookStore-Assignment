@@ -91,7 +91,7 @@ public class ProductCreateController {
             return "redirect:/admin/product/register";
         }
 
-        return "redirect:/products/list";
+        return "redirect:/";
     }
 }
 
