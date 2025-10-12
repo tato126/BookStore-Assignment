@@ -2,13 +2,17 @@ package org.bookstore.bookstore.products;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.bookstore.bookstore.category.Category;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -40,6 +44,10 @@ public class Products {
     private int price; // 상품 가격
     private int stockQuantity; // 상품 수량
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category; // 소분류 카테고리
+
     // 알라딘 API 연동 필드
     @Column(unique = true)
     private String isbn; // ISBN-13 (중복 등록 방지)
@@ -49,7 +57,6 @@ public class Products {
     private LocalDate publishDate; // 출판일
 
     private Integer originalPrice; // 정가 (할인율 계산용)
-    private String category; // 카테고리
 
     @CreatedDate
     private LocalDateTime createdAt; // 상품 생성일
@@ -77,11 +84,8 @@ public class Products {
      * @param updatedAt     수정 일시
      */
     @Builder
-    public Products(Long productId, String imageUrl, int bookSize, String productName,
-                   String description, int price, int stockQuantity,
-                   String isbn, String author, String publisher, LocalDate publishDate,
-                   Integer originalPrice, String category,
-                   LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Products(Long productId, String imageUrl, int bookSize, String productName, String description, int price, int stockQuantity, String isbn, String author, String publisher, LocalDate publishDate,
+                    Integer originalPrice, LocalDateTime createdAt, LocalDateTime updatedAt, Category category) {
         this.productId = productId;
         this.imageUrl = imageUrl;
         this.bookSize = bookSize;
@@ -89,6 +93,7 @@ public class Products {
         this.description = description;
         this.price = price;
         this.stockQuantity = stockQuantity;
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
         // 알라딘 API 필드
         this.isbn = isbn;
         this.author = author;

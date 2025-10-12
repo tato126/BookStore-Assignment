@@ -1,7 +1,12 @@
 package org.bookstore.bookstore.products.repository;
 
+import org.bookstore.bookstore.category.Category;
 import org.bookstore.bookstore.products.Products;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 import java.util.Optional;
 
@@ -12,6 +17,9 @@ import java.util.Optional;
  * @author chan
  */
 public interface ProductsRepository extends JpaRepository<Products, Long> {
+    Page<Products> findByCategory(Category category, Pageable pageable);
+
+    Page<Products> findByCategoryIn(List<Category> categories, Pageable pageable);
 
     /**
      * ISBN으로 상품이 존재하는지 확인합니다.

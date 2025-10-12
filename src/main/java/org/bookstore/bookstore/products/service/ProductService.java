@@ -2,6 +2,8 @@ package org.bookstore.bookstore.products.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.bookstore.bookstore.category.Category;
+import org.bookstore.bookstore.category.CategoryService;
 import org.bookstore.bookstore.products.Products;
 import org.bookstore.bookstore.products.dto.request.ProductCreateRequest;
 import org.bookstore.bookstore.products.dto.response.ProductListResponse;
@@ -10,7 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -25,6 +29,7 @@ import java.util.Optional;
 public class ProductService {
 
     private final ProductsRepository productsRepository;
+    private final CategoryService categoryService;
 
     /**
      * ID로 상품 조회 (장바구니용)
@@ -40,7 +45,10 @@ public class ProductService {
      * @param productCreateRequest 상품 생성 요청 DTO
      * @return 저장된 Products 엔티티
      */
+    @Transactional
     public Products registerProduct(@Valid ProductCreateRequest productCreateRequest) {
+
+        Category category = categoryService.getCategory(productCreateRequest.categoryId());
 
         // 엔티티 변환
         Products products = Products.builder()
@@ -50,13 +58,13 @@ public class ProductService {
                 .stockQuantity(productCreateRequest.stockQuantity())
                 .imageUrl(productCreateRequest.imageUrl())
                 .bookSize(productCreateRequest.bookSize())
+                .category(category)
                 // 알라딘 API 필드
                 .isbn(productCreateRequest.isbn())
                 .author(productCreateRequest.author())
                 .publisher(productCreateRequest.publisher())
                 .publishDate(productCreateRequest.publishDate())
                 .originalPrice(productCreateRequest.originalPrice())
-                .category(productCreateRequest.category())
                 .build();
 
         // 상품 저장
@@ -69,9 +77,29 @@ public class ProductService {
      * @param pageable 페이징 정보 (페이지 번호, 크기, 정렬)
      * @return 페이징 처리된 상품 목록 응답 DTO
      */
-    public Page<ProductListResponse> findAllProducts(Pageable pageable) {
-        // 상품 조회
-        Page<Products> productsPage = productsRepository.findAll(pageable);
+    public Page<ProductListResponse> findAllProducts(Pageable pageable,
+                                                     Long largeCategoryId,
+                                                     Long mediumCategoryId,
+                                                     Long smallCategoryId) {
+
+        Page<Products> productsPage;
+
+        if (smallCategoryId != null) {
+            Category category = categoryService.getCategory(smallCategoryId);
+            productsPage = productsRepository.findByCategory(category, pageable);
+        } else if (mediumCategoryId != null) {
+            List<Category> smallCategories = categoryService.getSmallCategoriesUnder(mediumCategoryId);
+            productsPage = smallCategories.isEmpty()
+                    ? Page.empty(pageable)
+                    : productsRepository.findByCategoryIn(smallCategories, pageable);
+        } else if (largeCategoryId != null) {
+            List<Category> smallCategories = categoryService.getSmallCategoriesUnder(largeCategoryId);
+            productsPage = smallCategories.isEmpty()
+                    ? Page.empty(pageable)
+                    : productsRepository.findByCategoryIn(smallCategories, pageable);
+        } else {
+            productsPage = productsRepository.findAll(pageable);
+        }
 
         // 엔티티 → DTO 변환
         return productsPage.map(ProductListResponse::from);

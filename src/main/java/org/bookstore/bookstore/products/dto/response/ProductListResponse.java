@@ -1,6 +1,7 @@
 package org.bookstore.bookstore.products.dto.response;
 
 import lombok.Builder;
+import org.bookstore.bookstore.category.Category;
 import org.bookstore.bookstore.products.Products;
 
 import java.time.LocalDate;
@@ -40,8 +41,15 @@ public record ProductListResponse(
         String publisher,
         LocalDate publishDate,
         Integer originalPrice,
-        String category,
-        LocalDateTime createdAt
+        Category category,
+        LocalDateTime createdAt,
+        Long largeCategoryId,
+        String largeCategoryName,
+        Long mediumCategoryId,
+        String mediumCategoryName,
+        Long smallCategoryId,
+        String smallCategoryName,
+        String categoryPath
 ) {
     /**
      * Products 엔티티를 ProductListResponse DTO로 변환합니다.
@@ -50,6 +58,11 @@ public record ProductListResponse(
      * @return ProductListResponse DTO
      */
     public static ProductListResponse from(Products products) {
+        Category small = products.getCategory();
+        Category medium = small != null ? small.getParent() : null;
+        Category large = medium != null ? medium.getParent() : null;
+        String categoryPath = buildCategoryPath(large, medium, small);
+
         return ProductListResponse.builder()
                 .productId(products.getProductId())
                 .productName(products.getProductName())
@@ -65,6 +78,33 @@ public record ProductListResponse(
                 .originalPrice(products.getOriginalPrice())
                 .category(products.getCategory())
                 .createdAt(products.getCreatedAt())
+                .largeCategoryId(large != null ? large.getId() : null)
+                .largeCategoryName(large != null ? large.getName() : null)
+                .mediumCategoryId(medium != null ? medium.getId() : null)
+                .mediumCategoryName(medium != null ? medium.getName() : null)
+                .smallCategoryId(small != null ? small.getId() : null)
+                .smallCategoryName(small != null ? small.getName() : null)
+                .categoryPath(categoryPath)
                 .build();
+    }
+
+    private static String buildCategoryPath(Category large, Category medium, Category small) {
+        StringBuilder builder = new StringBuilder();
+        if (large != null) {
+            builder.append(large.getName());
+        }
+        if (medium != null) {
+            if (builder.length() > 0) {
+                builder.append(" > ");
+            }
+            builder.append(medium.getName());
+        }
+        if (small != null) {
+            if (builder.length() > 0) {
+                builder.append(" > ");
+            }
+            builder.append(small.getName());
+        }
+        return builder.length() == 0 ? "미분류" : builder.toString();
     }
 }

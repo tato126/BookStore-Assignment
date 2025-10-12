@@ -10,6 +10,16 @@
     th { background: #f9fafb; }
     .toolbar { margin-bottom: 16px; display: flex; gap: 8px; }
     .btn { display:inline-block; padding:8px 12px; border:1px solid #d1d5db; border-radius:8px; text-decoration:none; }
+    select { padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; background: white; }
+    .category-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .category-filter button { padding: 8px 12px; border-radius: 6px; border: 1px solid #d1d5db; background: #f9fafb; cursor: pointer; }
+    .category-filter button:hover { background: #e5e7eb; }
+    .category-panel { margin: 16px 0; padding: 16px; border:1px solid #e5e7eb; border-radius: 12px; background: #f9fafb; }
+    .category-panel h2 { margin-top: 0; font-size: 18px; }
+    .category-tree { list-style: none; padding-left: 0; margin: 0; }
+    .category-tree ul { list-style: none; padding-left: 18px; margin: 6px 0 0; }
+    .category-tree li { margin: 4px 0; }
+    .category-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 12px; padding: 2px 6px; border-radius: 999px; margin-left: 6px; }
 
     /* 페이지네이션 스타일 */
     .pagination-container {
@@ -61,6 +71,59 @@
   <a class="btn" th:href="@{/admin/product/register}">+ 상품 등록</a>
   <a class="btn" th:href="@{/admin/aladin/search}" style="background: #2196F3; color: white; border-color: #2196F3;">📚 알라딘 도서 검색</a>
   <a class="btn" th:href="@{/}">홈으로</a>
+  <form id="categoryFilterForm" class="category-filter" th:action="@{/}" method="get">
+    <select id="filterLargeCategory" name="largeCategoryId">
+      <option value="" th:selected="${selectedLargeCategoryId == null}">대분류 전체</option>
+      <option th:each="category : ${largeCategories}"
+              th:value="${category.id}"
+              th:text="${category.name}"
+              th:selected="${selectedLargeCategoryId != null and selectedLargeCategoryId == category.id}"></option>
+    </select>
+
+    <select id="filterMediumCategory" name="mediumCategoryId"
+            th:disabled="${selectedLargeCategoryId == null}">
+      <option value="" th:selected="${selectedMediumCategoryId == null}">중분류 전체</option>
+      <option th:each="category : ${initialMediumCategories}"
+              th:value="${category.id}"
+              th:text="${category.name}"
+              th:selected="${selectedMediumCategoryId != null and selectedMediumCategoryId == category.id}"></option>
+    </select>
+
+    <select id="filterSmallCategory" name="smallCategoryId"
+            th:disabled="${selectedMediumCategoryId == null}">
+      <option value="" th:selected="${selectedSmallCategoryId == null}">소분류 전체</option>
+      <option th:each="category : ${initialSmallCategories}"
+              th:value="${category.id}"
+              th:text="${category.name}"
+              th:selected="${selectedSmallCategoryId != null and selectedSmallCategoryId == category.id}"></option>
+    </select>
+
+    <button type="submit">조회</button>
+    <button type="button" id="resetCategoryFilter">초기화</button>
+  </form>
+</div>
+
+<div class="category-panel" th:if="${categoryTree != null}">
+  <h2>카테고리 구조</h2>
+  <p style="color:#4b5563; font-size:14px; margin-bottom:12px;">현재 사용 중인 대 · 중 · 소 분류 전체를 확인할 수 있어요.</p>
+  <ul class="category-tree">
+    <li th:each="large : ${categoryTree}">
+      <strong th:text="${large.name}">문학</strong>
+      <span class="category-badge">대분류</span>
+      <ul>
+        <li th:each="medium : ${large.children}">
+          <span th:text="${medium.name}">한국소설</span>
+          <span class="category-badge" style="background:#dcfce7; color:#166534;">중분류</span>
+          <ul>
+            <li th:each="small : ${medium.children}">
+              <span th:text="${small.name}">현대 한국소설</span>
+              <span class="category-badge" style="background:#fee2e2; color:#991b1b;">소분류</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
 </div>
 
 <table>
@@ -72,6 +135,7 @@
     <th>설명</th>
     <th>가격</th>
     <th>재고</th>
+    <th>카테고리</th>
     <th>등록일</th>
   </tr>
   </thead>
@@ -87,10 +151,11 @@
     <td th:text="${p.description}">설명</td>
     <td th:text="${#numbers.formatInteger(p.price, 0, 'COMMA')} + '원'">10,000원</td>
     <td th:text="${p.stockQuantity}">5</td>
+    <td th:text="${p.categoryPath}">문학 > 한국소설 > 현대 한국소설</td>
     <td th:text="${#temporals.format(p.createdAt, 'yyyy년 MM월 dd일 HH시 mm분 ss초')}">2025년 09월 14일 18시 20분 12초</td>
   </tr>
   <tr th:if="${#lists.isEmpty(products)}">
-    <td colspan="7">등록된 상품이 없습니다.</td>
+    <td colspan="8">등록된 상품이 없습니다.</td>
   </tr>
   </tbody>
 </table>
@@ -156,4 +221,116 @@
 </div>
 
 </body>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('categoryFilterForm');
+    if (!form) {
+      return;
+    }
+
+    const largeCategory = document.getElementById('filterLargeCategory');
+    const mediumCategory = document.getElementById('filterMediumCategory');
+    const smallCategory = document.getElementById('filterSmallCategory');
+    const resetButton = document.getElementById('resetCategoryFilter');
+
+    function resetSelect(selectElement, placeholder) {
+      selectElement.innerHTML = '';
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = placeholder;
+      selectElement.appendChild(option);
+      selectElement.value = '';
+    }
+
+    function enableSelect(selectElement, enabled) {
+      if (enabled) {
+        selectElement.removeAttribute('disabled');
+      } else {
+        selectElement.setAttribute('disabled', 'disabled');
+      }
+    }
+
+    async function fetchCategories(level, parentId) {
+      const params = new URLSearchParams({ level });
+      if (parentId) {
+        params.append('parentId', parentId);
+      }
+
+      const response = await fetch(`/api/categories?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error('카테고리 정보를 불러오지 못했습니다.');
+      }
+      return response.json();
+    }
+
+    function populateSelect(selectElement, categories, placeholder) {
+      resetSelect(selectElement, placeholder);
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.id;
+        option.textContent = category.name;
+        selectElement.appendChild(option);
+      });
+    }
+
+    largeCategory.addEventListener('change', async () => {
+      const largeId = largeCategory.value;
+      resetSelect(mediumCategory, '중분류 전체');
+      resetSelect(smallCategory, '소분류 전체');
+      enableSelect(smallCategory, false);
+
+      if (!largeId) {
+        enableSelect(mediumCategory, false);
+        return;
+      }
+
+      try {
+        const categories = await fetchCategories('MEDIUM', largeId);
+        populateSelect(mediumCategory, categories, '중분류 전체');
+        enableSelect(mediumCategory, true);
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    mediumCategory.addEventListener('change', async () => {
+      const mediumId = mediumCategory.value;
+      resetSelect(smallCategory, '소분류 전체');
+
+      if (!mediumId) {
+        enableSelect(smallCategory, false);
+        return;
+      }
+
+      try {
+        const categories = await fetchCategories('SMALL', mediumId);
+        populateSelect(smallCategory, categories, '소분류 전체');
+        enableSelect(smallCategory, true);
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    resetButton.addEventListener('click', () => {
+      largeCategory.value = '';
+      resetSelect(mediumCategory, '중분류 전체');
+      resetSelect(smallCategory, '소분류 전체');
+      enableSelect(mediumCategory, false);
+      enableSelect(smallCategory, false);
+      form.submit();
+    });
+
+    // 페이지 진입 시 선택값에 맞춰 셀렉트 활성화 조정
+    if (!largeCategory.value) {
+      enableSelect(mediumCategory, false);
+      enableSelect(smallCategory, false);
+    } else if (!mediumCategory.value) {
+      enableSelect(mediumCategory, true);
+      enableSelect(smallCategory, false);
+    } else if (!smallCategory.value) {
+      enableSelect(mediumCategory, true);
+      enableSelect(smallCategory, true);
+    }
+  });
+</script>
 </html>

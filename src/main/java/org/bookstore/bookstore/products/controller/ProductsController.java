@@ -1,10 +1,11 @@
 package org.bookstore.bookstore.products.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.bookstore.bookstore.category.CategoryLevel;
+import org.bookstore.bookstore.category.CategoryService;
 import org.bookstore.bookstore.products.dto.response.ProductListResponse;
 import org.bookstore.bookstore.products.repository.ProductsRepository;
 import org.bookstore.bookstore.products.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -12,6 +13,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * {@link org.bookstore.bookstore.products.Products} 조회 컨트롤러.
@@ -26,6 +29,7 @@ public class ProductsController {
     private final ProductsRepository repository;
 
     private final ProductService productService;
+    private final CategoryService categoryService;
 
     /**
      * 전체 상품 목록을 조회합니다.
@@ -38,12 +42,22 @@ public class ProductsController {
     @GetMapping("/")
     public String list(
             @PageableDefault(size = 30, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(value = "largeCategoryId", required = false) Long largeCategoryId,
+            @RequestParam(value = "mediumCategoryId", required = false) Long mediumCategoryId,
+            @RequestParam(value = "smallCategoryId", required = false) Long smallCategoryId,
             Model model) {
 
-        Page<ProductListResponse> productList = productService.findAllProducts(pageable);
+        Page<ProductListResponse> productList = productService.findAllProducts(pageable, largeCategoryId, mediumCategoryId, smallCategoryId);
 
         model.addAttribute("products", productList.getContent());
         model.addAttribute("page", productList);
+        model.addAttribute("largeCategories", categoryService.getCategoriesByLevel(CategoryLevel.LARGE));
+        model.addAttribute("initialMediumCategories", largeCategoryId != null ? categoryService.getChildren(largeCategoryId) : List.of());
+        model.addAttribute("initialSmallCategories", mediumCategoryId != null ? categoryService.getChildren(mediumCategoryId) : List.of());
+        model.addAttribute("selectedLargeCategoryId", largeCategoryId);
+        model.addAttribute("selectedMediumCategoryId", mediumCategoryId);
+        model.addAttribute("selectedSmallCategoryId", smallCategoryId);
+        model.addAttribute("categoryTree", categoryService.getCategoryHierarchy());
 
         return "products/list";
     }

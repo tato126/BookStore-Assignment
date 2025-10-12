@@ -55,6 +55,9 @@ public record ProductCreateRequest(
         String publisher,
         LocalDate publishDate,
         Integer originalPrice,
-        String category
+        String category,
+
+        @NotNull(message = "카테고리는 필수입니다")
+        Long categoryId
 ) {
 }
