@@ -6,6 +6,8 @@ import org.bookstore.bookstore.products.dto.request.ProductCreateRequest;
 import org.bookstore.bookstore.products.repository.ProductsRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /**
  * 상품 관리 서비스 클래스.
  * 상품 등록, 조회, 수정, 삭제 등의 비즈니스 로직을 처리합니다.
@@ -17,6 +19,13 @@ import org.springframework.stereotype.Service;
 public class ProductService {
 
     private final ProductsRepository productsRepository;
+
+    /**
+     * ID로 상품 조회 (장바구니용)
+     */
+    public Optional<Products> findById(Long productId) {
+        return productsRepository.findById(productId);
+    }
 
     /**
      * 새로운 상품을 등록합니다.
