@@ -46,6 +46,6 @@ public class UserLoginController {
 
         userService.login(userLoginRequest);
 
-        return "redirect:/products/list";
+        return "redirect:/";
     }
 }

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알라딘 도서 등록 - BookStore</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .btn-back {
+            background-color: #757575;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .btn-back:hover {
+            background-color: #616161;
+        }
+
+        .book-info {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .book-cover {
+            width: 200px;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-details {
+            flex: 1;
+        }
+
+        .book-details h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            width: 100px;
+            color: #666;
+        }
+
+        .detail-value {
+            color: #333;
+        }
+
+        .form-section {
+            margin-top: 30px;
+        }
+
+        .form-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .required {
+            color: #f44336;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .form-control.error {
+            border-color: #f44336;
+        }
+
+        .error-message {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .help-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+
+        .btn-secondary {
+            background-color: #757575;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #616161;
+        }
+
+        .readonly-field {
+            background-color: #f5f5f5;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <button class="btn-back" onclick="location.href='/admin/aladin/search'">← 검색으로 돌아가기</button>
+
+    <h1>📚 도서 정보 확인 및 등록</h1>
+
+    <!-- 도서 정보 미리보기 -->
+    <div class="book-info">
+        <img th:src="${book.cover}" alt="Book Cover" class="book-cover">
+        <div class="book-details">
+            <h2 th:text="${book.title}">도서명</h2>
+            <div class="detail-row">
+                <span class="detail-label">저자:</span>
+                <span class="detail-value" th:text="${book.author}">저자명</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">출판사:</span>
+                <span class="detail-value" th:text="${book.publisher}">출판사명</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">출간일:</span>
+                <span class="detail-value" th:text="${book.pubDate}">출간일</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">ISBN:</span>
+                <span class="detail-value" th:text="${book.isbn13}">ISBN-13</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">정가:</span>
+                <span class="detail-value" th:text="${#numbers.formatInteger(book.priceStandard, 0, 'COMMA')} + '원'">가격</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">카테고리:</span>
+                <span class="detail-value" th:text="${book.categoryName}">카테고리</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 등록 양식 -->
+    <div class="form-section">
+        <h3>추가 정보 입력</h3>
+        <form id="registerForm" th:action="@{/admin/aladin/import}" method="post">
+            <!-- ISBN (숨김) -->
+            <input type="hidden" name="isbn" th:value="${book.isbn13}">
+
+            <!-- 재고 수량 -->
+            <div class="form-group">
+                <label for="stockQuantity">
+                    재고 수량 <span class="required">*</span>
+                </label>
+                <input type="number"
+                       id="stockQuantity"
+                       name="stockQuantity"
+                       class="form-control"
+                       min="0"
+                       max="10000"
+                       required>
+                <div class="error-message" id="stockQuantityError">재고 수량을 0 이상 10,000 이하로 입력해주세요.</div>
+                <div class="help-text">입고할 재고 수량을 입력하세요. (0 ~ 10,000)</div>
+            </div>
+
+            <!-- 책 크기 -->
+            <div class="form-group">
+                <label for="bookSize">
+                    책 크기 (페이지 수) <span class="required">*</span>
+                </label>
+                <input type="number"
+                       id="bookSize"
+                       name="bookSize"
+                       class="form-control"
+                       min="1"
+                       max="10000"
+                       required>
+                <div class="error-message" id="bookSizeError">책 크기를 1 이상 10,000 이하로 입력해주세요.</div>
+                <div class="help-text">책의 총 페이지 수를 입력하세요. (1 ~ 10,000)</div>
+            </div>
+
+            <!-- 버튼 -->
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="location.href='/admin/aladin/search'">
+                    취소
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    상품 등록
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('registerForm');
+    const stockQuantity = document.getElementById('stockQuantity');
+    const bookSize = document.getElementById('bookSize');
+
+    // 실시간 유효성 검사
+    stockQuantity.addEventListener('input', function () {
+        validateField(this, 'stockQuantityError', 0, 10000);
+    });
+
+    bookSize.addEventListener('input', function () {
+        validateField(this, 'bookSizeError', 1, 10000);
+    });
+
+    // 필드 유효성 검사
+    function validateField(field, errorId, min, max) {
+        const errorElement = document.getElementById(errorId);
+        const value = parseInt(field.value);
+
+        if (field.value === '' || isNaN(value) || value < min || value > max) {
+            field.classList.add('error');
+            errorElement.style.display = 'block';
+            return false;
+        } else {
+            field.classList.remove('error');
+            errorElement.style.display = 'none';
+            return true;
+        }
+    }
+
+    // 폼 제출 시 유효성 검사
+    form.addEventListener('submit', function (e) {
+        const isStockValid = validateField(stockQuantity, 'stockQuantityError', 0, 10000);
+        const isBookSizeValid = validateField(bookSize, 'bookSizeError', 1, 10000);
+
+        if (!isStockValid || !isBookSizeValid) {
+            e.preventDefault();
+            alert('입력 정보를 다시 확인해주세요.');
+            return false;
+        }
+
+        // 확인 메시지
+        if (!confirm('이 도서를 상품으로 등록하시겠습니까?')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+</script>
+</body>
+</html>

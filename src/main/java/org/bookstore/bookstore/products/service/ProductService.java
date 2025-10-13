@@ -1,5 +1,6 @@
 package org.bookstore.bookstore.products.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.bookstore.bookstore.category.Category;
 import org.bookstore.bookstore.category.CategoryService;
@@ -10,6 +11,7 @@ import org.bookstore.bookstore.products.repository.ProductsRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.Optional;
  *
  * @author chan
  */
+@Validated
 @RequiredArgsConstructor
 @Service
 public class ProductService {
@@ -43,7 +46,7 @@ public class ProductService {
      * @return 저장된 Products 엔티티
      */
     @Transactional
-    public Products registerProduct(ProductCreateRequest productCreateRequest) {
+    public Products registerProduct(@Valid ProductCreateRequest productCreateRequest) {
 
         Category category = categoryService.getCategory(productCreateRequest.categoryId());
 
@@ -56,6 +59,12 @@ public class ProductService {
                 .imageUrl(productCreateRequest.imageUrl())
                 .bookSize(productCreateRequest.bookSize())
                 .category(category)
+                // 알라딘 API 필드
+                .isbn(productCreateRequest.isbn())
+                .author(productCreateRequest.author())
+                .publisher(productCreateRequest.publisher())
+                .publishDate(productCreateRequest.publishDate())
+                .originalPrice(productCreateRequest.originalPrice())
                 .build();
 
         // 상품 저장
